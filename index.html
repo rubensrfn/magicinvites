@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagicInvites - Convites que Encantam</title>
+    <meta name="description" content="Transforme o aniversário do seu filho com convites digitais animados e com realidade aumentada.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <style>
+        /* scroll-padding-top garante que o menu fixo não cubra o conteúdo ao rolar */
+        html { scroll-padding-top: 100px; }
+        body { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
+        .font-brand { font-family: 'Pacifico', cursive; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Classe de Perspectiva para o 3D funcionar bem */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .phone-mockup {
+            border: 12px solid #1f2937;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            aspect-ratio: 9/19;
+            background: #fff;
+            /* Garante que o iframe não "vaze" os cantos arredondados */
+            transform-style: preserve-3d; 
+            backface-visibility: hidden;
+        }
+        
+        /* Efeito de brilho no botão PIX */
+        .btn-pix {
+            background: linear-gradient(45deg, #10b981, #059669);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-pix::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine { 100% { left: 100%; } }
+
+        /* Estilo para os cards de temas */
+        .theme-card {
+            transition: all 0.3s ease;
+        }
+        .theme-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- NAV -->
+    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-brand gradient-text">MagicInvites</div>
+            <a href="#comprar" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-bold hover:bg-indigo-700 transition hidden md:block">
+                Pedir Convite
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="pt-32 pb-20 px-4 overflow-hidden">
+        <!-- ALTERAÇÃO: Mudei de md:flex-row para lg:flex-row. 
+             Isso faz com que em notebooks menores o layout fique vertical, evitando sobreposição. -->
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+            
+            <div class="lg:w-1/2 space-y-6 text-center lg:text-left z-10 relative">
+                <span class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wider">Lançamento</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight text-slate-900">
+                    O convite que vira <span class="gradient-text">Mágica</span>.
+                </h1>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Esqueça o papel ou o PDF chato. Surpreenda seus convidados com uma experiência animada, com música e <strong>Realidade Aumentada 3D</strong>.
+                </p>
+                
+                <!-- BOTÕES DE NAVEGAÇÃO -->
+                <div class="grid grid-cols-2 sm:flex sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start mt-6">
+                    <!-- 1. Ver Exemplo -->
+                    <a href="#mockup-container" class="px-4 py-3 md:px-6 md:py-4 bg-white border-2 border-indigo-100 text-indigo-600 rounded-xl font-bold hover:border-indigo-500 transition flex items-center justify-center gap-2 text-sm md:text-base">
+                        <i data-lucide="smartphone" class="w-5 h-5"></i> Exemplo
+                    </a>
+                    
+                    <!-- 2. Comprar -->
+                    <a href="#comprar" class="px-4 py-3 md:px-6 md:py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 hover:shadow-indigo-500/30 transition flex items-center justify-center gap-2 text-sm md:text-base">
+                        Encomendar
+                    </a>
+
+                    <!-- 3. Vantagens -->
+                    <a href="#vantagens" class="px-4 py-3 md:px-6 md:py-4 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition flex items-center justify-center gap-2 text-sm md:text-base">
+                        <i data-lucide="star" class="w-4 h-4"></i> Vantagens
+                    </a>
+
+                    <!-- 4. Temas -->
+                    <a href="#temas" class="px-4 py-3 md:px-6 md:py-4 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition flex items-center justify-center gap-2 text-sm md:text-base">
+                        <i data-lucide="palette" class="w-4 h-4"></i> Temas
+                    </a>
+                </div>
+            </div>
+
+            <!-- MOCKUP DO CELULAR -->
+            <!-- Adicionei lg:mt-0 e lg:rotate -->
+            <div id="mockup-container" class="lg:w-1/2 flex justify-center perspective-1000 mt-12 lg:mt-0 scroll-mt-32">
+                <div class="phone-mockup w-64 md:w-72 transform lg:rotate-y-12 lg:rotate-z-2 hover:rotate-0 transition duration-700 cursor-pointer shadow-2xl">
+                    <!-- Aqui carregamos o convite da Isis como demonstração -->
+                    <iframe src="niverisis/index.html" class="w-full h-full border-0" title="Demonstração"></iframe>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- FEATURES -->
+    <section id="vantagens" class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Por que escolher o MagicInvites?</h2>
+                <p class="text-slate-500">Muito mais que data e hora. Uma experiência.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="p-8 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-xl transition border border-slate-100">
+                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
+                        <i data-lucide="sparkles" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Animação & História</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Contamos uma mini história. O personagem muda de roupa, a neve cai, o fundo brilha. Encantamento puro.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="p-8 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-xl transition border border-slate-100">
+                    <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 mb-6">
+                        <i data-lucide="box" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Realidade Aumentada</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Seus convidados podem ver o personagem em 3D na sala da casa deles usando a câmera do celular.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="p-8 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-xl transition border border-slate-100">
+                    <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 mb-6">
+                        <i data-lucide="check-circle" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Confirmação Fácil</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Botões que abrem direto no WhatsApp para confirmar presença ou no GPS para mostrar o caminho da festa.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEMES SHOWCASE -->
+    <section id="temas" class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-600 font-bold uppercase tracking-wider text-sm">Variedade</span>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 mt-2">Qualquer tema vira mágica</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">Não importa o personagem favorito do seu filho ou filha. Nós criamos o universo perfeito.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Princesas -->
+                <div class="theme-card bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3 text-pink-500">
+                        <i data-lucide="crown" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800">Princesas</h3>
+                    <p class="text-xs text-slate-500 mt-2">Frozen, Moana, Cinderela, Ariel, Rapunzel...</p>
+                </div>
+
+                <!-- Heróis -->
+                <div class="theme-card bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500">
+                        <i data-lucide="shield" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800">Heróis</h3>
+                    <p class="text-xs text-slate-500 mt-2">Homem-Aranha, Vingadores, Batman, Hulk...</p>
+                </div>
+
+                <!-- Games -->
+                <div class="theme-card bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-green-500">
+                        <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800">Games</h3>
+                    <p class="text-xs text-slate-500 mt-2">Minecraft, Roblox, Super Mario, Sonic...</p>
+                </div>
+
+                <!-- Kids -->
+                <div class="theme-card bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 text-yellow-600">
+                        <i data-lucide="smile" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800">Kids</h3>
+                    <p class="text-xs text-slate-500 mt-2">Patrulha Canina, Dinossauros, Mundo Bita...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="comprar" class="py-20 bg-slate-900 text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">Pronto para impressionar?</h2>
+            <p class="text-slate-400 mb-12 max-w-lg mx-auto">
+                Garanta o convite mais tecnológico da escola. Entrega em até 48h.
+            </p>
+
+            <div class="bg-white text-slate-900 rounded-3xl p-8 md:p-12 max-w-md mx-auto relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-yellow-400 text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Promoção</div>
+                
+                <h3 class="text-xl font-bold text-slate-500 uppercase tracking-widest mb-2">Convite Premium</h3>
+                <div class="text-5xl font-extrabold mb-6 flex justify-center items-start">
+                    <span class="text-2xl mt-1">R$</span>69,90
+                </div>
+
+                <ul class="text-left space-y-4 mb-8 text-slate-600">
+                    <li class="flex items-center gap-2"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Link exclusivo personalizado</li>
+                    <li class="flex items-center gap-2"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Fotos e Cores do tema (Qualquer tema)</li>
+                    <li class="flex items-center gap-2"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Botão de Confirmação WhatsApp</li>
+                    <li class="flex items-center gap-2"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> <strong>Personagem 3D (AR) incluso!</strong></li>
+                </ul>
+
+                <button onclick="openModal()" class="w-full py-4 btn-pix text-white font-bold rounded-xl text-lg shadow-xl hover:scale-[1.02] transition flex items-center justify-center gap-2">
+                    <i data-lucide="qr-code"></i> Pagar com PIX
+                </button>
+                <p class="text-xs text-slate-400 mt-4">Compra 100% segura via PIX</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-50 py-10 border-t border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 text-center text-slate-500 text-sm">
+            <p class="font-brand text-2xl mb-4 gradient-text">MagicInvites</p>
+            <p>&copy; 2026 Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL PIX -->
+    <div id="pixModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full relative animate-[fadeInUp_0.3s_ease-out]">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                    <i data-lucide="qr-code" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Pagamento via PIX</h3>
+                <p class="text-slate-500 text-sm mb-6">
+                    Copie o código abaixo e pague no app do seu banco. Após pagar, envie o comprovante no WhatsApp.
+                </p>
+
+                <!-- Área do Código Copia e Cola -->
+                <div class="bg-slate-100 p-4 rounded-xl border border-slate-200 mb-4 relative group">
+                    <p class="font-mono text-xs text-slate-500 break-all text-left" id="pixCode">
+                        <!-- INSIRA SEU CÓDIGO PIX COPIA E COLA AQUI ABAIXO -->
+                        00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540569.905802BR5913SEU NOME AQUI6008CIDADE62070503***6304ABCD
+                    </p>
+                    <button onclick="copyPix()" class="absolute right-2 top-2 bg-white shadow-sm border border-slate-200 p-2 rounded-lg hover:bg-slate-50 transition" title="Copiar">
+                        <i data-lucide="copy" class="w-4 h-4 text-slate-600"></i>
+                    </button>
+                </div>
+
+                <div id="copyFeedback" class="text-green-600 text-xs font-bold mb-4 opacity-0 transition">
+                    Código copiado com sucesso!
+                </div>
+
+                <a href="https://wa.me/5585999999999?text=Olá!%20Fiz%20o%20pagamento%20do%20convite%20via%20PIX.%20Segue%20o%20comprovante." target="_blank" class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i> Enviar Comprovante
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializa ícones
+        lucide.createIcons();
+        
+        // Animação de Scroll
+        ScrollReveal().reveal('header div', { delay: 200, distance: '20px', origin: 'bottom' });
+        ScrollReveal().reveal('.phone-mockup', { delay: 400, distance: '40px', origin: 'right' });
+        ScrollReveal().reveal('.grid > div', { interval: 200, distance: '20px', origin: 'bottom' });
+
+        // Funções do Modal
+        const modal = document.getElementById('pixModal');
+
+        function openModal() {
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // Fechar ao clicar fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Função de Copiar PIX
+        function copyPix() {
+            const code = document.getElementById('pixCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const feedback = document.getElementById('copyFeedback');
+                feedback.style.opacity = '1';
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

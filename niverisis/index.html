@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport otimizado para mobile evitando zoom indesejado -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Convite Especial</title>
+    
+    <!-- CONFIGURAÇÃO PWA (APP) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="intro.jpg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        /* --- GESTÃO DE FUNDOS --- */
+        body, html {
+            width: 100%;
+            min-height: 100vh;      
+            min-height: 100dvh;     
+            margin: 0;
+            overflow-x: hidden;     
+            overflow-y: auto;       
+            font-family: 'Montserrat', sans-serif;
+            user-select: none; 
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bg-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center top; background-repeat: no-repeat;
+            transition: opacity 1.5s ease-in-out; z-index: -1;
+        }
+
+        /* --- ARQUIVOS GENÉRICOS --- */
+        #bg-normal {
+            background-image: url('intro.jpg'); 
+            /* Fallback para visualização online caso não tenha o arquivo local */
+            background-image: image-set(url('intro.jpg') 1x, url('https://www.dropbox.com/scl/fi/8p0z8up96d0ejv2r9cjxj/IMG_8440.jpg?rlkey=pii24hzin89zidpwjire7s2jm&st=nnxtnc6x&raw=1') 1x);
+            opacity: 1;
+        }
+
+        #bg-theme {
+            background-image: url('tema.jpg');
+            background-image: image-set(url('tema.jpg') 1x, url('https://www.dropbox.com/scl/fi/9fxo0q5dxh25zx7uui41g/342e5605-9180-4c32-8ef2-aa6cebbf0a76.JPG?rlkey=icmoqd8gspa4h0r5fm6470uhi&st=hzteue95&raw=1') 1x);
+            opacity: 0;
+        }
+
+        #overlay-color {
+            position: fixed; inset: 0;
+            background: linear-gradient(to bottom, rgba(236, 72, 153, 0.2), rgba(88, 28, 135, 0.6));
+            transition: background 1.5s ease; z-index: 0; pointer-events: none;
+        }
+        
+        .theme-active #overlay-color {
+            background: linear-gradient(to bottom, rgba(14, 165, 233, 0.1), rgba(2, 6, 23, 0.6));
+        }
+
+        #magic-flash {
+            position: fixed; inset: 0; background: white; opacity: 0;
+            pointer-events: none; z-index: 100; transition: opacity 0.5s;
+        }
+
+        /* --- PAINÉIS --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border-radius: 2rem; color: white;
+            transition: opacity 0.5s ease, transform 0.5s ease; position: relative;
+            max-width: 100%;
+        }
+        
+        .glass-panel.hidden-content {
+            background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+            border-color: transparent; box-shadow: none;
+        }
+        .glass-panel.hidden-content > *:not(.control-btn) {
+            opacity: 0; pointer-events: none;
+        }
+
+        /* Botões de Controle */
+        .controls-container {
+            position: absolute; top: 1rem; right: 1rem;
+            display: flex; gap: 0.5rem; z-index: 50;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .control-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+        /* Telas */
+        .screen {
+            display: none; opacity: 0; transform: scale(0.95);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            width: 100%;
+        }
+        .screen.active { display: block; opacity: 1; transform: scale(1); }
+
+        /* 3D Model */
+        model-viewer {
+            width: 100%; height: 300px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 1rem; margin-bottom: 0.5rem;
+            --poster-color: transparent; overflow: visible;
+        }
+
+        .ar-button-custom {
+            background-color: white; border-radius: 24px; border: none;
+            position: absolute; bottom: 16px; right: 16px; padding: 8px 16px;
+            color: #2563eb; font-weight: bold; font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Tipografia e Animações */
+        .font-royal { font-family: 'Cinzel', serif; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+        .title-glow { text-shadow: 0 0 15px rgba(255, 255, 255, 0.9); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+        #snow-container { opacity: 0; transition: opacity 2s ease; }
+        .snowflake {
+            position: fixed; 
+            top: -2rem; color: white;
+            pointer-events: none; animation: fall linear infinite;
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        @keyframes pulse-magic {
+            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(236, 72, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+        .btn-magic { background: linear-gradient(45deg, #ec4899, #8b5cf6); animation: pulse-magic 2s infinite; }
+        .btn-ice { background: linear-gradient(45deg, #0ea5e9, #2563eb); box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
+        .btn-ar { background: linear-gradient(45deg, #6366f1, #a855f7); border: 1px solid rgba(255,255,255,0.4); }
+        .btn-whatsapp { background: #25D366; }
+        .btn-maps { background: rgba(255,255,255,0.15); border: 1px solid white; }
+        .btn-restart {
+            margin-top: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.7);
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.5rem;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-[100dvh] w-full py-10 px-4">
+
+    <!-- ARQUIVOS DE MÍDIA GENÉRICOS -->
+    <div id="bg-normal" class="bg-layer"></div>
+    <div id="bg-theme" class="bg-layer"></div>
+    <div id="overlay-color"></div>
+    <div id="magic-flash"></div>
+    <div id="snow-container" class="fixed inset-0 pointer-events-none z-10"></div>
+
+    <audio id="bg-music" loop>
+        <source src="audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- ===== CENA 1: INTRODUÇÃO ===== -->
+    <main id="screen-intro" class="screen active w-full max-w-md relative z-20 text-center">
+        <div class="glass-panel p-8">
+            <div class="controls-container">
+                <button onclick="toggleVisibility(this)" class="control-btn" title="Esconder"><i data-lucide="eye" class="w-5 h-5 text-white"></i></button>
+            </div>
+            
+            <div class="mb-4 mt-2"><i data-lucide="sparkles" class="w-10 h-10 text-pink-300 mx-auto animate-bounce"></i></div>
+            <h1 class="text-3xl font-royal font-bold mb-2 title-glow text-white">A Isis tem um segredo...</h1>
+            <p class="text-white font-medium mb-8 leading-relaxed drop-shadow-md">Ela descobriu poderes mágicos congelantes! Quer ver?</p>
+            <button onclick="realizarTransformacao()" class="btn-magic w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2 transform transition active:scale-95 group shadow-xl">
+                <i data-lucide="wand-2" class="w-6 h-6 group-hover:rotate-45 transition"></i> <span>Fazer Magia</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- ===== CENA 2: CONVITE ===== -->
+    <main id="screen-invite" class="screen w-full max-w-md relative z-20 text-center">
+        <div class="glass-panel p-6 md:p-8 border-blue-200">
+            <div class="controls-container">
+                <button onclick="toggleSound(this)" class="control-btn" title="Som"><i data-lucide="volume-2" class="w-5 h-5 text-white"></i></button>
+                <button onclick="toggleVisibility(this)" class="control-btn" title="Esconder"><i data-lucide="eye" class="w-5 h-5 text-white"></i></button>
+            </div>
+
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 pointer-events-none">
+                <i data-lucide="snowflake" class="w-12 h-12 text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-spin-slow"></i>
+            </div>
+
+            <h1 class="text-6xl font-royal font-black tracking-widest leading-none mb-1 mt-4 title-glow">ISIS</h1>
+            <p class="text-xs font-bold text-blue-100 tracking-[0.3em] uppercase mb-4">Nascimento Nunes</p>
+
+            <div class="my-4 relative">
+                <span class="relative font-cursive text-5xl text-yellow-300 drop-shadow-md">5 Anos</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-blue-50 mb-6">
+                <div class="bg-blue-900/40 p-2 rounded-lg border border-blue-400/30">
+                    <div class="text-[10px] uppercase opacity-80 text-cyan-200">Data</div>
+                    <div class="font-bold text-xl">18 JAN</div>
+                </div>
+                <div class="bg-blue-900/40 p-2 rounded-lg border border-blue-400/30">
+                    <div class="text-[10px] uppercase opacity-80 text-cyan-200">Horário</div>
+                    <div class="font-bold text-xl">16:00</div>
+                </div>
+            </div>
+
+            <div class="text-white mb-6">
+                <p class="font-bold text-lg leading-tight text-shadow">Av. dos Golfinhos, 2071</p>
+                <p class="text-xs opacity-90 mt-1">Porto das Dunas - CE</p>
+            </div>
+
+            <button onclick="trocarTela('screen-invite', 'screen-3d')" class="btn-ar w-full py-3 mb-3 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 group transition hover:scale-[1.02] shadow-lg">
+                <i data-lucide="box" class="w-5 h-5"></i> <span>Ver Personagem em 3D</span>
+            </button>
+
+            <button onclick="trocarTela('screen-invite', 'screen-actions')" class="btn-ice w-full py-3 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 group transition hover:brightness-110 shadow-lg">
+                <span>Confirmar Presença</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+            
+            <button onclick="reiniciarMagia()" class="btn-restart"><i data-lucide="rotate-ccw" class="w-3 h-3"></i> Rever Transformação</button>
+        </div>
+    </main>
+
+    <!-- ===== CENA 3: 3D ===== -->
+    <main id="screen-3d" class="screen w-full max-w-md relative z-20 text-center">
+        <div class="glass-panel p-6">
+            <div class="controls-container">
+                <button onclick="toggleSound(this)" class="control-btn"><i data-lucide="volume-2" class="w-5 h-5 text-white"></i></button>
+            </div>
+            <button onclick="trocarTela('screen-3d', 'screen-invite')" class="absolute top-4 left-4 text-white/70 hover:text-white flex items-center gap-1 text-xs font-bold uppercase tracking-wider">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i> Voltar
+            </button>
+            
+            <h2 class="text-2xl font-royal font-bold text-white mb-2 mt-8 title-glow">Magia 3D</h2>
+            
+            <!-- MODELO 3D: ARQUIVOS GENÉRICOS (modelo.glb e modelo.usdz) -->
+            <model-viewer 
+                src="modelo.glb"
+                ios-src="modelo.usdz"
+                alt="Personagem 3D" ar ar-modes="webxr scene-viewer quick-look" 
+                camera-controls auto-rotate shadow-intensity="1">
+                <button slot="ar-button" class="ar-button-custom">
+                    <i data-lucide="scan-face" class="w-4 h-4"></i> Ver na sua Sala
+                </button>
+            </model-viewer>
+
+            <div class="text-[11px] text-blue-100 bg-blue-900/30 p-2 rounded-lg mb-4 border border-blue-400/20">
+                <p class="font-bold mb-1">⚠️ Dica:</p> O botão <strong>"Ver na sua Sala"</strong> aparece apenas no celular.
+            </div>
+
+            <button onclick="trocarTela('screen-3d', 'screen-actions')" class="btn-ice w-full py-3 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 shadow-lg">
+                <span>Ir para Confirmação</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- ===== CENA 4: AÇÕES ===== -->
+    <main id="screen-actions" class="screen w-full max-w-md relative z-20 text-center">
+        <div class="glass-panel p-6 md:p-8">
+            <div class="controls-container">
+                <button onclick="toggleSound(this)" class="control-btn"><i data-lucide="volume-2" class="w-5 h-5 text-white"></i></button>
+                <button onclick="toggleVisibility(this)" class="control-btn"><i data-lucide="eye" class="w-5 h-5 text-white"></i></button>
+            </div>
+            <button onclick="trocarTela('screen-actions', 'screen-invite')" class="absolute top-4 left-4 text-white/70 hover:text-white flex items-center gap-1 text-xs font-bold uppercase tracking-wider">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i> Voltar
+            </button>
+
+            <h2 class="text-2xl font-royal font-bold text-white mb-2 mt-8 title-glow">Confirmação</h2>
+            
+            <div class="space-y-3 mt-6">
+                <button onclick="abrirLink('whatsapp')" class="btn-whatsapp w-full py-3 rounded-xl text-white font-bold text-base flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] transition">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i> <span>WhatsApp</span>
+                </button>
+                <button onclick="abrirLink('maps')" class="btn-maps w-full py-3 rounded-xl text-white font-semibold text-base flex items-center justify-center gap-2 hover:bg-white/30 transition">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-red-300"></i> <span>Localização</span>
+                </button>
+                <button onclick="abrirLink('calendar')" class="btn-maps w-full py-3 rounded-xl text-white font-semibold text-base flex items-center justify-center gap-2 hover:bg-white/30 transition">
+                    <i data-lucide="calendar" class="w-5 h-5 text-blue-300"></i> <span>Agenda</span>
+                </button>
+            </div>
+            
+            <button onclick="reiniciarMagia()" class="btn-restart mt-4"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reiniciar Mágica</button>
+        </div>
+    </main>
+
+    <script>
+        // SERVICE WORKER (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registrado!', reg.scope))
+                    .catch(err => console.log('SW falhou:', err));
+            });
+        }
+
+        lucide.createIcons();
+
+        // --- ÁUDIO ---
+        const music = document.getElementById('bg-music');
+        
+        function toggleSound(btn) {
+            if (music.paused) {
+                music.play();
+                btn.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5 text-white"></i>';
+            } else {
+                music.pause();
+                btn.innerHTML = '<i data-lucide="volume-x" class="w-5 h-5 text-white"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        // --- TRANSFORMAÇÃO ---
+        function realizarTransformacao() {
+            const flash = document.getElementById('magic-flash');
+            flash.style.opacity = '1';
+
+            music.volume = 0.5;
+            music.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+
+            setTimeout(() => {
+                document.getElementById('bg-normal').style.opacity = '0';
+                document.getElementById('bg-theme').style.opacity = '1';
+                document.body.classList.add('theme-active');
+                document.getElementById('snow-container').style.opacity = '1';
+                trocarTela('screen-intro', 'screen-invite');
+            }, 500);
+            setTimeout(() => { flash.style.opacity = '0'; }, 1000);
+        }
+
+        function reiniciarMagia() {
+            document.getElementById('bg-normal').style.opacity = '1';
+            document.getElementById('bg-theme').style.opacity = '0';
+            document.body.classList.remove('theme-active');
+            document.getElementById('snow-container').style.opacity = '0';
+            
+            music.pause();
+            music.currentTime = 0;
+            
+            document.querySelectorAll('.glass-panel').forEach(p => p.classList.remove('hidden-content'));
+            document.querySelectorAll('.control-btn[title="Esconder"]').forEach(btn => btn.innerHTML = '<i data-lucide="eye" class="w-5 h-5 text-white"></i>');
+            lucide.createIcons();
+            
+            const activeScreen = document.querySelector('.screen.active');
+            if(activeScreen) trocarTela(activeScreen.id, 'screen-intro');
+        }
+
+        function toggleVisibility(btn) {
+            const panel = btn.closest('.glass-panel');
+            if (panel.classList.contains('hidden-content')) {
+                panel.classList.remove('hidden-content');
+                btn.innerHTML = '<i data-lucide="eye" class="w-5 h-5 text-white"></i>';
+            } else {
+                panel.classList.add('hidden-content');
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-5 h-5 text-white"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        function trocarTela(idAtual, idDestino) {
+            const atual = document.getElementById(idAtual);
+            const destino = document.getElementById(idDestino);
+            atual.classList.remove('active');
+            setTimeout(() => {
+                atual.style.display = 'none';
+                destino.style.display = 'block';
+                setTimeout(() => destino.classList.add('active'), 50);
+            }, 500);
+        }
+
+        function abrirLink(tipo) {
+            // EDITE SEUS DADOS AQUI
+            const telefone = "5585999999999"; 
+            const msgZap = "Olá! Confirmo minha presença no aniversário da Isis.";
+            const endereco = "Av. dos Golfinhos, 2071, Porto das Dunas, Aquiraz - CE";
+            let url = "";
+            if (tipo === 'whatsapp') url = `https://api.whatsapp.com/send?phone=${telefone}&text=${encodeURIComponent(msgZap)}`;
+            else if (tipo === 'maps') url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(endereco)}`;
+            else if (tipo === 'calendar') url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("Niver Isis 5 Anos")}&details=${encodeURIComponent("Festa Frozen em " + endereco)}&location=${encodeURIComponent(endereco)}&dates=20260118T160000/20260118T200000`;
+            if(url) window.open(url, '_blank');
+        }
+
+        function createSnow() {
+            const container = document.getElementById('snow-container');
+            for (let i = 0; i < 50; i++) {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                flake.textContent = ['❄', '❅', '•', '✨'][Math.floor(Math.random() * 4)];
+                flake.style.left = Math.random() * 100 + 'vw';
+                flake.style.fontSize = (Math.random() * 1.5 + 0.5) + 'rem';
+                flake.style.opacity = Math.random() * 0.7 + 0.3;
+                flake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                flake.style.animationDelay = '-' + (Math.random() * 10) + 's';
+                container.appendChild(flake);
+            }
+        }
+        window.onload = createSnow;
+    </script>
+</body>
+</html>
